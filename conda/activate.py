@@ -741,48 +741,48 @@ class _Activator(metaclass=abc.ABCMeta):
         return basename(prefix) if basename(dirname(prefix)) == "envs" else prefix
 
     def _prompt_modifier(self, prefix, conda_default_env):
-            # Get current environment and prompt stack
-            env_stack = []
-            prompt_stack = []
-            old_shlvl = int(os.getenv("CONDA_SHLVL", "0").rstrip())
-            for i in range(1, old_shlvl + 1):
-                if i == old_shlvl:
-                    env_i = self._default_env(os.getenv("CONDA_PREFIX", ""))
-                else:
-                    env_i = self._default_env(
-                        os.getenv(f"CONDA_PREFIX_{i}", "").rstrip()
-                    )
-                stacked_i = bool(os.getenv(f"CONDA_STACKED_{i}", "").rstrip())
-                env_stack.append(env_i)
-                if not stacked_i:
-                    prompt_stack = prompt_stack[0:-1]
-                prompt_stack.append(env_i)
-
-            # Modify prompt stack according to pending operation
-            deactivate = getattr(self, "_deactivate", False)
-            reactivate = getattr(self, "_reactivate", False)
-            if deactivate:
-                prompt_stack = prompt_stack[0:-1]
-                env_stack = env_stack[0:-1]
-                stacked = bool(os.getenv(f"CONDA_STACKED_{old_shlvl}", "").rstrip())
-                if not stacked and env_stack:
-                    prompt_stack.append(env_stack[-1])
-            elif reactivate:
-                pass
+        # Get current environment and prompt stack
+        env_stack = []
+        prompt_stack = []
+        old_shlvl = int(os.getenv("CONDA_SHLVL", "0").rstrip())
+        for i in range(1, old_shlvl + 1):
+            if i == old_shlvl:
+                env_i = self._default_env(os.getenv("CONDA_PREFIX", ""))
             else:
-                stack = getattr(self, "stack", False)
-                if not stack:
-                    prompt_stack = prompt_stack[0:-1]
-                prompt_stack.append(conda_default_env)
+                env_i = self._default_env(
+                    os.getenv(f"CONDA_PREFIX_{i}", "").rstrip()
+                )
+            stacked_i = bool(os.getenv(f"CONDA_STACKED_{i}", "").rstrip())
+            env_stack.append(env_i)
+            if not stacked_i:
+                prompt_stack = prompt_stack[0:-1]
+            prompt_stack.append(env_i)
 
-            conda_stacked_env = ",".join(prompt_stack[::-1])
+        # Modify prompt stack according to pending operation
+        deactivate = getattr(self, "_deactivate", False)
+        reactivate = getattr(self, "_reactivate", False)
+        if deactivate:
+            prompt_stack = prompt_stack[0:-1]
+            env_stack = env_stack[0:-1]
+            stacked = bool(os.getenv(f"CONDA_STACKED_{old_shlvl}", "").rstrip())
+            if not stacked and env_stack:
+                prompt_stack.append(env_stack[-1])
+        elif reactivate:
+            pass
+        else:
+            stack = getattr(self, "stack", False)
+            if not stack:
+                prompt_stack = prompt_stack[0:-1]
+            prompt_stack.append(conda_default_env)
 
-            return context.env_prompt.format(
-                default_env=conda_default_env,
-                stacked_env=conda_stacked_env,
-                prefix=prefix,
-                name=basename(prefix),
-            )
+        conda_stacked_env = ",".join(prompt_stack[::-1])
+
+        return context.env_prompt.format(
+            default_env=conda_default_env,
+            stacked_env=conda_stacked_env,
+            prefix=prefix,
+            name=basename(prefix),
+        )
 
     def _get_activate_scripts(self, prefix):
         _script_extension = self.script_extension
