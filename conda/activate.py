@@ -741,7 +741,6 @@ class _Activator(metaclass=abc.ABCMeta):
         return basename(prefix) if basename(dirname(prefix)) == "envs" else prefix
 
     def _prompt_modifier(self, prefix, conda_default_env):
-        if context.changeps1:
             # Get current environment and prompt stack
             env_stack = []
             prompt_stack = []
@@ -784,8 +783,6 @@ class _Activator(metaclass=abc.ABCMeta):
                 prefix=prefix,
                 name=basename(prefix),
             )
-        else:
-            return ""
 
     def _get_activate_scripts(self, prefix):
         _script_extension = self.script_extension
